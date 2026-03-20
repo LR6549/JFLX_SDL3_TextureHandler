@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <iostream>
 
-bool JFLX::SDL3::textureHandler::loadTextureFolder(const std::string& folderPath) {
+bool JFLX::SDL3::TextureHandler::loadTextureFolder(const std::string& folderPath) {
     cleanup();
 
     if (!fs::exists(folderPath) || !fs::is_directory(folderPath)) {
@@ -47,19 +47,23 @@ bool JFLX::SDL3::textureHandler::loadTextureFolder(const std::string& folderPath
     return true;
 }
 
-int JFLX::SDL3::textureHandler::getTextureLayer(const std::string& name) const {
+bool JFLX::SDL3::TextureHandler::exists(const std::string& name) const {
+    return textureLayers.contains(name);
+}
+
+int JFLX::SDL3::TextureHandler::getTextureLayer(const std::string& name) const {
     auto it = textureLayers.find(name);
     return (it == textureLayers.end()) ? -1 : it->second;
 }
 
-SDL_Texture* JFLX::SDL3::textureHandler::getTexture(int layer) const {
+SDL_Texture* JFLX::SDL3::TextureHandler::getTexture(int layer) const {
     if (layer < 0 || layer >= static_cast<int>(textures.size())) {
         return nullptr;
     }
     return textures[layer];
 }
 
-bool JFLX::SDL3::textureHandler::renderTexture(
+bool JFLX::SDL3::TextureHandler::renderTexture(
     int layer,
     float x, float y,
     float scaleX,
@@ -95,7 +99,7 @@ bool JFLX::SDL3::textureHandler::renderTexture(
     return true;
 }
 
-bool JFLX::SDL3::textureHandler::renderTexture(
+bool JFLX::SDL3::TextureHandler::renderTexture(
     const std::string& name,
     float x, float y,
     float scaleX,
@@ -112,7 +116,7 @@ bool JFLX::SDL3::textureHandler::renderTexture(
     return renderTexture(layer, x, y, scaleX, scaleY, rotation, flip, color);
 }
 
-void JFLX::SDL3::textureHandler::cleanup() {
+void JFLX::SDL3::TextureHandler::cleanup() {
     for (SDL_Texture* tex : textures) {
         SDL_DestroyTexture(tex);
     }

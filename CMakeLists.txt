@@ -15,9 +15,13 @@ elseif(UNIX)
     include(osSpecificLibs)
 endif()
 
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 add_library(${PROJECT_NAME} STATIC
-        textureHandler.hpp
-        textureHandler.cpp
+        TextureHandler.hpp
+        TextureHandler.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
