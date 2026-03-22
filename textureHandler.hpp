@@ -5,24 +5,33 @@
 #ifndef JFLX_SDL3_TEXTUREHANDLER_HPP
 #define JFLX_SDL3_TEXTUREHANDLER_HPP
 
-// Macro guard (in addition to the #ifndef above) that can be used for
-// compile-time feature detection: #ifdef JFLX_SDL3_TEXTUREHANDLER
 #define JFLX_SDL3_TEXTUREHANDLER
 
-#include <SDL3/SDL.h>                        // Core SDL3: SDL_Renderer, SDL_Texture, SDL_Color, SDL_FlipMode, …
-#include <SDL3/SDL3_image/SDL_image.h>       // SDL3_image: IMG_LoadTexture() for PNG/JPG/BMP/… support
+#include <SDL3/SDL.h>
+#include <SDL3/SDL3_image/SDL_image.h>
 
 #include <JFLX_Header/logging.hpp>
 
-#include <unordered_map>   // O(1) average lookup: texture name  →  layer index
-#include <string>          // std::string for texture names / file paths
-#include <filesystem>      // std::filesystem::path / directory_iterator for folder loading
-#include <vector>          // Ordered, index-accessible storage for SDL_Texture* pointers
+#include <unordered_map>
+#include <string>
+#include <filesystem>
+#include <vector>
 
-// Convenience alias so we can write fs::path instead of std::filesystem::path throughout
 namespace fs = std::filesystem;
 
 namespace JFLX::SDL3 {
+
+    /**
+     * @brief Controls which point of the texture is placed at (x, y).
+     *
+     *  CENTERED     – texture centre          → (x, y)
+     *  TOPLEFT      – top-left corner         → (x, y)  [SDL default]
+     *  TOPRIGHT     – top-right corner        → (x, y)
+     *  BOTTOMLEFT   – bottom-left corner      → (x, y)
+     *  BOTTOMRIGHT  – bottom-right corner     → (x, y)
+     *
+     * Rotation (if non-zero) always pivots around the anchor point.
+     */
     enum class renderMode {
         JFLX_RENDER_CENTERED,
         JFLX_RENDER_TOPLEFT,
@@ -115,20 +124,28 @@ namespace JFLX::SDL3 {
 
         // ------------------------------------------------------------------ //
         //  Render overloads
-        //  Both variants build the same SDL_FRect destination rect from
-        //  (x, y, textureWidth * scaleX, textureHeight * scaleY), then call
-        //  SDL_RenderTextureRotated() with the supplied transform parameters.
+        //
+        //  (x, y) is the anchor point whose meaning is determined by @p mode:
+        //
+        //    JFLX_RENDER_TOPLEFT      top-left corner     → (x, y)  [SDL default]
+        //    JFLX_RENDER_CENTERED     texture centre      → (x, y)
+        //    JFLX_RENDER_TOPRIGHT     top-right corner    → (x, y)
+        //    JFLX_RENDER_BOTTOMLEFT   bottom-left corner  → (x, y)
+        //    JFLX_RENDER_BOTTOMRIGHT  bottom-right corner → (x, y)
+        //
+        //  Rotation always pivots around the anchor point.
         // ------------------------------------------------------------------ //
 
         /**
          * @brief Renders the texture at the given layer index.
          *
          * @param layer     Zero-based layer index of the texture to render.
-         * @param x         Destination X position in renderer coordinates.
-         * @param y         Destination Y position in renderer coordinates.
+         * @param x         Anchor X position in renderer coordinates.
+         * @param y         Anchor Y position in renderer coordinates.
+         * @param mode      Which corner / centre of the texture is placed at (x, y).
          * @param scaleX    Horizontal scale factor (1.0 = original width).
          * @param scaleY    Vertical scale factor   (1.0 = original height).
-         * @param rotation  Clockwise rotation in degrees around the texture centre.
+         * @param rotation  Clockwise rotation in degrees around the anchor point.
          * @param flip      SDL_FLIP_NONE / SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL.
          * @param color     Colour & alpha modulation applied before rendering
          *                  (white + full alpha = no modulation).
@@ -136,11 +153,12 @@ namespace JFLX::SDL3 {
          */
         bool renderTexture(int layer,
                            float x, float y,
+                           renderMode mode      = renderMode::JFLX_RENDER_TOPLEFT,
                            float scaleX         = 1.f,
                            float scaleY         = 1.f,
                            double rotation      = 0.0,
-                           SDL_FlipMode flip     = SDL_FLIP_NONE,
-                           SDL_Color color      = {255, 255, 255, 0}) const;
+                           SDL_FlipMode flip    = SDL_FLIP_NONE,
+                           SDL_Color color      = {255, 255, 255, 255}) const;
 
         /**
          * @brief Renders the texture identified by name (convenience overload).
@@ -153,11 +171,12 @@ namespace JFLX::SDL3 {
          */
         bool renderTexture(const std::string& name,
                            float x, float y,
+                           renderMode mode      = renderMode::JFLX_RENDER_TOPLEFT,
                            float scaleX         = 1.f,
                            float scaleY         = 1.f,
                            double rotation      = 0.0,
-                           SDL_FlipMode flip     = SDL_FLIP_NONE,
-                           SDL_Color color      = {255, 255, 255, 0}) const;
+                           SDL_FlipMode flip    = SDL_FLIP_NONE,
+                           SDL_Color color      = {255, 255, 255, 255}) const;
 
         /**
          * @brief Destroys all loaded textures and clears the internal containers.
