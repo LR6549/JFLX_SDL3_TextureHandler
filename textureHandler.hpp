@@ -88,10 +88,11 @@ namespace JFLX::SDL3 {
          * key in textureLayers) is the file's stem without extension.
          *
          * @param folderPath  Path to the folder containing image files.
+         * @param scaling Change the texture scaling mode, default is nearest
          * @return true  if at least one texture was loaded successfully.
          * @return false if the folder is empty, inaccessible, or no file could be loaded.
          */
-        bool loadTextureFolder(const std::string& folderPath);
+        bool loadTextureFolder(const std::string& folderPath, SDL_ScaleMode scaling = SDL_SCALEMODE_NEAREST);
 
         /**
          * @brief Checks whether a texture with the given name has been loaded.
