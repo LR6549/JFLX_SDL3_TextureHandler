@@ -34,10 +34,14 @@ namespace JFLX::SDL3 {
      */
     enum class renderMode {
         JFLX_RENDER_CENTERED,
-        JFLX_RENDER_TOPLEFT,
-        JFLX_RENDER_TOPRIGHT,
-        JFLX_RENDER_BOTTOMLEFT,
-        JFLX_RENDER_BOTTOMRIGHT
+        JFLX_RENDER_TOP_CENTERED,
+        JFLX_RENDER_TOP_LEFT,
+        JFLX_RENDER_LEFT_CENTERED,
+        JFLX_RENDER_TOP_RIGHT,
+        JFLX_RENDER_RIGHT_CENTERED,
+        JFLX_RENDER_BOTTOM_CENTERED,
+        JFLX_RENDER_BOTTOM_LEFT,
+        JFLX_RENDER_BOTTOM_RIGHT
     };
 
     /**
@@ -128,12 +132,6 @@ namespace JFLX::SDL3 {
         //
         //  (x, y) is the anchor point whose meaning is determined by @p mode:
         //
-        //    JFLX_RENDER_TOPLEFT      top-left corner     → (x, y)  [SDL default]
-        //    JFLX_RENDER_CENTERED     texture centre      → (x, y)
-        //    JFLX_RENDER_TOPRIGHT     top-right corner    → (x, y)
-        //    JFLX_RENDER_BOTTOMLEFT   bottom-left corner  → (x, y)
-        //    JFLX_RENDER_BOTTOMRIGHT  bottom-right corner → (x, y)
-        //
         //  Rotation always pivots around the anchor point.
         // ------------------------------------------------------------------ //
 
@@ -154,7 +152,7 @@ namespace JFLX::SDL3 {
          */
         bool renderTexture(int layer,
                            float x, float y,
-                           renderMode mode      = renderMode::JFLX_RENDER_TOPLEFT,
+                           renderMode mode      = renderMode::JFLX_RENDER_CENTERED,
                            float scaleX         = 1.f,
                            float scaleY         = 1.f,
                            double rotation      = 0.0,
@@ -172,7 +170,7 @@ namespace JFLX::SDL3 {
          */
         bool renderTexture(const std::string& name,
                            float x, float y,
-                           renderMode mode      = renderMode::JFLX_RENDER_TOPLEFT,
+                           renderMode mode      = renderMode::JFLX_RENDER_CENTERED,
                            float scaleX         = 1.f,
                            float scaleY         = 1.f,
                            double rotation      = 0.0,

@@ -72,25 +72,28 @@ bool JFLX::SDL3::TextureHandler::renderTexture(int layer, float x, float y, rend
     const float w = static_cast<float>(tex->w) * scaleX;
     const float h = static_cast<float>(tex->h) * scaleY;
 
-    // --------------------------------------------------------
-    // Compute top-left corner of dstRect from the anchor point.
-    // anchorOffX / anchorOffY describe the anchor's position
-    // *within* the texture rect (0,0 = top-left, w,h = bottom-right).
-    // --------------------------------------------------------
     float anchorOffX = 0.f;
     float anchorOffY = 0.f;
 
     switch (mode) {
-        case renderMode::JFLX_RENDER_TOPLEFT:
-            anchorOffX = 0.f;   anchorOffY = 0.f;   break;
-        case renderMode::JFLX_RENDER_TOPRIGHT:
-            anchorOffX = w;     anchorOffY = 0.f;   break;
-        case renderMode::JFLX_RENDER_BOTTOMLEFT:
-            anchorOffX = 0.f;   anchorOffY = h;     break;
-        case renderMode::JFLX_RENDER_BOTTOMRIGHT:
-            anchorOffX = w;     anchorOffY = h;     break;
         case renderMode::JFLX_RENDER_CENTERED:
-            anchorOffX = w / 2.f; anchorOffY = h / 2.f; break;
+            anchorOffX = w / 2.f;   anchorOffY = h / 2.f;  break;
+        case renderMode::JFLX_RENDER_TOP_CENTERED:
+            anchorOffX = w / 2.f;   anchorOffY = 0.f;       break;
+        case renderMode::JFLX_RENDER_TOP_LEFT:
+            anchorOffX = 0.f;       anchorOffY = 0.f;       break;
+        case renderMode::JFLX_RENDER_LEFT_CENTERED:
+            anchorOffX = 0.f;       anchorOffY = h / 2.f;   break;
+        case renderMode::JFLX_RENDER_TOP_RIGHT:
+            anchorOffX = w;         anchorOffY = 0.f;       break;
+        case renderMode::JFLX_RENDER_RIGHT_CENTERED:
+            anchorOffX = w;         anchorOffY = h / 2.f;   break;
+        case renderMode::JFLX_RENDER_BOTTOM_CENTERED:
+            anchorOffX = w / 2.f;   anchorOffY = h;         break;
+        case renderMode::JFLX_RENDER_BOTTOM_LEFT:
+            anchorOffX = 0.f;       anchorOffY = h;         break;
+        case renderMode::JFLX_RENDER_BOTTOM_RIGHT:
+            anchorOffX = w;         anchorOffY = h;         break;
     }
 
     SDL_FRect dstRect {
@@ -100,18 +103,14 @@ bool JFLX::SDL3::TextureHandler::renderTexture(int layer, float x, float y, rend
         h
     };
 
-    // The SDL centre point is relative to dstRect's top-left,
-    // so it always equals the anchor offset computed above.
     SDL_FPoint center { anchorOffX, anchorOffY };
 
-    // Apply colour + alpha modulation
     SDL_SetTextureColorMod(tex, color.r, color.g, color.b);
     SDL_SetTextureAlphaMod(tex, color.a);
 
     SDL_RenderTextureRotated(renderer, tex, nullptr, &dstRect,
                              rotation, &center, flip);
 
-    // Restore neutral modulation so other textures are unaffected
     SDL_SetTextureColorMod(tex, 255, 255, 255);
     SDL_SetTextureAlphaMod(tex, 255);
 
