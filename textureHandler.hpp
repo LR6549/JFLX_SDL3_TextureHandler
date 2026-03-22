@@ -12,6 +12,8 @@
 #include <SDL3/SDL.h>                        // Core SDL3: SDL_Renderer, SDL_Texture, SDL_Color, SDL_FlipMode, …
 #include <SDL3/SDL3_image/SDL_image.h>       // SDL3_image: IMG_LoadTexture() for PNG/JPG/BMP/… support
 
+#include <JFLX_Header/logging.hpp>
+
 #include <unordered_map>   // O(1) average lookup: texture name  →  layer index
 #include <string>          // std::string for texture names / file paths
 #include <filesystem>      // std::filesystem::path / directory_iterator for folder loading
@@ -21,6 +23,13 @@
 namespace fs = std::filesystem;
 
 namespace JFLX::SDL3 {
+    enum class renderMode {
+        JFLX_RENDER_CENTERED,
+        JFLX_RENDER_TOPLEFT,
+        JFLX_RENDER_TOPRIGHT,
+        JFLX_RENDER_BOTTOMLEFT,
+        JFLX_RENDER_BOTTOMRIGHT
+    };
 
     /**
      * @brief Manages a collection of SDL_Texture* objects loaded from a folder.

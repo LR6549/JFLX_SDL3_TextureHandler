@@ -7,41 +7,35 @@
 #include <algorithm>
 #include <iostream>
 
+// Only Supports png, jpeg, bmp and gif
 bool JFLX::SDL3::TextureHandler::loadTextureFolder(const std::string& folderPath) {
     cleanup();
 
-    if (!fs::exists(folderPath) || !fs::is_directory(folderPath)) {
-        std::cerr << "Texture folder does not exist: " << folderPath << "\n";
-        return false;
+    if (!fs::exists(folderPath)) {
+        JFLX::log("Texture folder does not exist: ", folderPath, JFLX::LOGTYPE::JFLX_INFO);
+        return 0;
     }
 
-    std::vector<fs::path> files;
-    for (const auto& entry : fs::directory_iterator(folderPath)) {
-        if (entry.is_regular_file()) {
-            files.push_back(entry.path());
+    for (const auto& dir : fs::recursive_directory_iterator(folderPath)) {
+        std::string ext = dir.path().extension().string();
+        if (ext != ".png" || ext != ".jpg" || ext != ".bmp" || ext != ".gif") {
+            std::string tempPath = dir.path().string();
+            std::string tempNameAndExt = dir.path().stem().string();
+            std::string tempName = dir.path().stem().filename().string();
+
+            JFLX::log("Texture: ", (tempNameAndExt + " in " + tempPath), JFLX::LOGTYPE::JFLX_INFO);
+
+            //* load Texture from file
+            SDL_Texture* tex = IMG_LoadTexture(renderer, tempPath.c_str());
+            if (!tex) {
+                JFLX::log("Failed to load texture: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+                continue;
+            }
+
+            textureLayers[tempName] = static_cast<int>(textures.size());
+            textures.push_back(tex);
+            JFLX::log("Loaded Texture: ", tempNameAndExt, JFLX::LOGTYPE::JFLX_SUCCESS);
         }
-    }
-
-    if (files.empty()) {
-        std::cerr << "Texture folder is empty: " << folderPath << "\n";
-        return false;
-    }
-
-    std::ranges::sort(files);
-
-    for (const auto& file : files) {
-        SDL_Texture* tex = IMG_LoadTexture(renderer, file.string().c_str());
-        if (!tex) {
-            std::cerr << "Failed to load texture: " << file
-                      << " — " << SDL_GetError() << "\n";
-            cleanup();
-            return false;
-        }
-
-        textureLayers[file.stem().string()] =
-            static_cast<int>(textures.size());
-
-        textures.push_back(tex);
     }
 
     return true;
@@ -63,15 +57,7 @@ SDL_Texture* JFLX::SDL3::TextureHandler::getTexture(int layer) const {
     return textures[layer];
 }
 
-bool JFLX::SDL3::TextureHandler::renderTexture(
-    int layer,
-    float x, float y,
-    float scaleX,
-    float scaleY,
-    double rotation,
-    SDL_FlipMode flip,
-    SDL_Color color) const
-{
+bool JFLX::SDL3::TextureHandler::renderTexture(int layer, float x, float y, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, SDL_Color color) const {
     SDL_Texture* tex = getTexture(layer);
     if (!tex) {
         std::cerr << "renderTexture: invalid layer " << layer << "\n";
@@ -99,15 +85,7 @@ bool JFLX::SDL3::TextureHandler::renderTexture(
     return true;
 }
 
-bool JFLX::SDL3::TextureHandler::renderTexture(
-    const std::string& name,
-    float x, float y,
-    float scaleX,
-    float scaleY,
-    double rotation,
-    SDL_FlipMode flip,
-    SDL_Color color) const
-{
+bool JFLX::SDL3::TextureHandler::renderTexture(const std::string& name, float x, float y, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, SDL_Color color) const {
     const int layer = getTextureLayer(name);
     if (layer == -1) {
         std::cerr << "renderTexture: unknown texture '" << name << "'\n";
