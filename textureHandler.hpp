@@ -10,7 +10,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL3_image/SDL_image.h>
 
-#include <JFLX_Header/logging.hpp>
+#include <JFLX/logging.hpp>
 
 #include <unordered_map>
 #include <string>
